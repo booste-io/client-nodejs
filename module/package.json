@@ -1,6 +1,6 @@
 {
   "name": "booste",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A node client to interact with Booste's machine learning inference APIs",
   "main": "index.js",
   "scripts": {

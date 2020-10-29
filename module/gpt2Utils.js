@@ -3,13 +3,13 @@ const axios = require('axios');
 exports.gpt2SyncMain = async (apiKey, modelSize, inString, length, temperature, windowMax) => {
     const syncMode = "synchronous"
     validateInput(temperature, windowMax)
-    taskID = await callStartAPI(apiKey, syncMode, modelSize, inString, length, temperature, windowMax)
+    const taskID = await callStartAPI(apiKey, syncMode, modelSize, inString, length, temperature, windowMax)
     const delayParams = chooseDelayParams(modelSize, length, windowMax)
     const interval = delayParams['interval']
     const initialWait = delayParams['initialWait']
     await timeout(initialWait)
     while (true) {
-        jsonOut = await callCheckAPI(apiKey, syncMode, taskID)
+        const jsonOut = await callCheckAPI(apiKey, syncMode, taskID)
         if (jsonOut['Status'] === "Finished"){
             return jsonOut["Output"]
         }
@@ -24,13 +24,13 @@ exports.gpt2SyncMain = async (apiKey, modelSize, inString, length, temperature, 
 exports.gpt2AsyncStartMain = async (apiKey, modelSize, inString, length, temperature, windowMax) => {
     const syncMode = "asynchronous"
     validateInput(temperature, windowMax)
-    taskID = await callStartAPI(apiKey, syncMode, modelSize, inString, length, temperature, windowMax)
+    const taskID = await callStartAPI(apiKey, syncMode, modelSize, inString, length, temperature, windowMax)
     return taskID
 }
 
 exports.gpt2AsyncCheckMain = async (apiKey, taskID) => {
     const syncMode = "asynchronous"
-    jsonOut = await callCheckAPI(apiKey, syncMode, taskID)
+    const jsonOut = await callCheckAPI(apiKey, syncMode, taskID)
     return jsonOut
 }
 
@@ -90,7 +90,7 @@ const callCheckAPI = async (apiKey, syncMode, taskID) => {
     const response = await axios.post(urlCheck, payload).catch(err => {
         if (err.response) {
             const format = {
-                "code" : response.status_code,
+                "code" : err.response,
                 "message" : response.data['message']
             }
             throw `- Server error: Booste inference server returned status code ${format.code}\n${format.message}`
