@@ -11,7 +11,7 @@ exports.gpt2 = async (apiKey, inString, length = 5, temperature = 0.8, windowMax
   return out_list
 }
 
-exports.gpt2AsyncStart = async (apiKey, inString, length = 5, temperature = 0.8, windowMax = 100) => {
+exports.gpt2Start = async (apiKey, inString, length = 5, temperature = 0.8, windowMax = 100) => {
   const taskID = await gpt2Utils.gpt2AsyncStartMain(
     apiKey = apiKey, 
     modelSize = "gpt2", 
@@ -22,7 +22,7 @@ exports.gpt2AsyncStart = async (apiKey, inString, length = 5, temperature = 0.8,
   return taskID
 }
 
-exports.gpt2AsyncCheck = async (apiKey, taskID) => {
+exports.gpt2Check = async (apiKey, taskID) => {
   const jsonOut = await gpt2Utils.gpt2AsyncCheckMain(apiKey, taskID)
   return jsonOut
 }
@@ -38,7 +38,7 @@ exports.gpt2XL = async (apiKey, inString, length = 5, temperature = 0.8, windowM
   return out_list
 }
 
-exports.gpt2XLAsyncStart = async (apiKey, inString, length = 5, temperature = 0.8, windowMax = 100) => {
+exports.gpt2XLStart = async (apiKey, inString, length = 5, temperature = 0.8, windowMax = 100) => {
   const taskID = await gpt2Utils.gpt2AsyncStartMain(
     apiKey = apiKey, 
     modelSize = "gpt2-xl", 
@@ -49,7 +49,7 @@ exports.gpt2XLAsyncStart = async (apiKey, inString, length = 5, temperature = 0.
   return taskID
 }
 
-exports.gpt2XLAsyncCheck = async (apiKey, taskID) => {
+exports.gpt2XLCheck = async (apiKey, taskID) => {
   const jsonOut = await gpt2Utils.gpt2AsyncCheckMain(apiKey, taskID)
   return jsonOut
 }
