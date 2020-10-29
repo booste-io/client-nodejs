@@ -1,0 +1,14 @@
+{
+  "name": "booste",
+  "version": "0.0.1",
+  "description": "A node client to interact with Booste's machine learning inference APIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Booste",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.0"
+  }
+}
