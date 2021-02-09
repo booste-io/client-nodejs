@@ -1,6 +1,6 @@
 {
   "name": "booste",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "A node client to interact with Booste's machine learning inference APIs",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,9 @@
   "author": "Booste",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.0"
+    "axios": "^0.21.0",
+    "image-to-base64": "^2.1.1",
+    "utf8": "^3.0.0",
+    "valid-url": "^1.0.9"
   }
 }

@@ -1,5 +1,14 @@
 const axios = require('axios');
 
+if ("BoosteURL" in process.env){
+    var endpoint = process.env.BoosteURL
+    if (process.env.BoosteURL === "local"){
+        endpoint = "http://localhost/"
+    }
+} else {
+    var endpoint = 'https://booste-corporation-v3-flask.zeet.app/'
+}
+
 exports.gpt2SyncMain = async (apiKey, modelSize, inString, length, temperature, windowMax) => {
     const syncMode = "synchronous"
     validateInput(temperature, windowMax)
@@ -47,9 +56,7 @@ const validateInput = (temperature, windowMax) => {
 }
 
 const callStartAPI = async (apiKey, syncMode, modelSize, inString, length, temperature, windowMax) => {
-    // const endpoint = "http://localhost/"
-    // const route_start = 'inference/pretrained/gpt2/async/start/v2'
-    const urlStart = "https://booste-corporation-v3-flask.zeet.app/inference/pretrained/gpt2/async/start"
+    const urlStart = endpoint.concat("inference/pretrained/gpt2/async/start")
     const payload = {
         "string" : inString,
         "length" : length,
@@ -63,8 +70,8 @@ const callStartAPI = async (apiKey, syncMode, modelSize, inString, length, tempe
     const response = await axios.post(urlStart, payload).catch(err => {
         if (err.response) {
             const format = {
-                "code" : response.status_code,
-                "message" : response.data['message']
+                "code" : err.response.status,
+                "message" : err.response.data['message']
             }
             throw `- Server error: Booste inference server returned status code ${format.code}\n${format.message}`
         } else if (err.request) {
@@ -80,7 +87,7 @@ const callStartAPI = async (apiKey, syncMode, modelSize, inString, length, tempe
 }
 
 const callCheckAPI = async (apiKey, syncMode, taskID) => {
-    const urlCheck= "https://booste-corporation-v3-flask.zeet.app/inference/pretrained/gpt2/async/check/v2"
+    const urlCheck = endpoint.concat("inference/pretrained/gpt2/async/check/v2")
     const payload = {
         "apiKey" : apiKey,
         "syncMode" : syncMode,
@@ -90,8 +97,8 @@ const callCheckAPI = async (apiKey, syncMode, taskID) => {
     const response = await axios.post(urlCheck, payload).catch(err => {
         if (err.response) {
             const format = {
-                "code" : err.response,
-                "message" : response.data['message']
+                "code" : err.response.status,
+                "message" : err.response.data['message']
             }
             throw `- Server error: Booste inference server returned status code ${format.code}\n${format.message}`
         } else if (err.request) {

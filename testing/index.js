@@ -1,46 +1,57 @@
 const booste = require('booste');
 
+var string = "This is a test for"
+const apiKey = process.env.apiKey
+const modelKey = process.env.modelKey
 
-const string = "short test sentences are best"
-
-let syncTest = async () => {
-    const string = "short test sentences are best"
-    // Sync test:
-    try{
-        // console.log("Sync test")
-        const out = await booste.gpt2(apiKey = "f1f22e45-8ae6-4658-911c-cb015014cc03", inString = string, length=10, temperature=0.8, windowMax=10)
-        console.log("sync out", out)
-    }catch(e){
-        // console.log("Error", e)
-    }
+const modelParameters = {
+        "string": string,
+        "length": 100,
+        "temperature" : 0.85,
+        "outputQuantity": 1
 }
 
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
-let asyncTest = async () => {
-    const string = "short test sentences are best"
-    // Async test:
+let run = async (modelParameters) => {
+    console.log("Starting call with parameters:")
+    console.log(modelParameters)
     try{
-        // console.log("Async test")
-        var taskID = await booste.gpt2XLAsyncStart(apiKey = "f1f22e45-8ae6-4658-911c-cb015014cc03", inString = string, length=10, temperature=0.8, windowMax=10)
-        // console.log("Async TaskID returned from Start API:", taskID)
-        out = await booste.gpt2XLAsyncCheck(apiKey = "f1f22e45-8ae6-4658-911c-cb015014cc03", taskID = taskID)
-        console.log("async out", out)
-
-        while (true){
-            await timeout(3000)
-            out = await booste.gpt2XLAsyncCheck(apiKey = "f1f22e45-8ae6-4658-911c-cb015014cc03", taskID = taskID)
-            console.log("async out", out)
-            if (out.Status === "Finished" || out.Status === "Failed") {
-                break
+        var cum = 0
+        var runs = 1
+        for (var i=0; i<runs; i++){
+            var start = new Date()
+            try{
+                var out = await booste.run(apiKey, modelKey, modelParameters)
+            } catch(e){
+                console.log(e)
             }
+            
+            console.log(out)
+            var runVal = new Date() - start
+            cum = cum + runVal
+            console.log(runVal)
         }
-    }catch(e){
-        // console.log("Error", e)
-    }
-}
+        console.log("done")
+        console.log(cum/runs)
 
-syncTest()
-asyncTest()
+    }catch(e){
+        console.log(e)
+    }
+    
+}
+    
+run(modelParameters)      
+run(modelParameters)    
+// run(modelParameters)  
+// run(modelParameters)      
+// run(modelParameters)    
+// run(modelParameters)  
+// run(modelParameters)      
+// run(modelParameters)    
+// run(modelParameters)  
+// run(modelParameters)      
+// run(modelParameters)    
+// run(modelParameters)  
+// run(modelParameters)      
+// run(modelParameters)    
+// run(modelParameters)  
