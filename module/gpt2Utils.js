@@ -1,12 +1,13 @@
 const axios = require('axios');
 
-if ("BoosteURL" in process.env){
-    var endpoint = process.env.BoosteURL
-    if (process.env.BoosteURL === "local"){
+if ("BOOSTE_URL" in process.env){
+    var endpoint = process.env.BOOSTE_URL
+    if (process.env.BOOSTE_URL === "local"){
+        console.log("Running GPT2 from local")
         endpoint = "http://localhost/"
     }
 } else {
-    var endpoint = 'https://booste-corporation-v3-flask.zeet.app/'
+    var endpoint = 'https://api.booste.io/'
 }
 
 exports.gpt2SyncMain = async (apiKey, modelSize, inString, length, temperature, windowMax) => {
@@ -66,6 +67,8 @@ const callStartAPI = async (apiKey, syncMode, modelSize, inString, length, tempe
         "windowMax" : windowMax, 
         "syncMode": syncMode
     }
+
+    // console.log(urlStart)
     
     const response = await axios.post(urlStart, payload).catch(err => {
         if (err.response) {
@@ -93,6 +96,9 @@ const callCheckAPI = async (apiKey, syncMode, taskID) => {
         "syncMode" : syncMode,
         "taskID" : taskID
     }
+
+
+    // console.log(urlCheck)
     
     const response = await axios.post(urlCheck, payload).catch(err => {
         if (err.response) {

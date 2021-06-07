@@ -1,28 +1,23 @@
 const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
 
-if ("BoosteURL" in process.env){
-    var endpoint = process.env.BoosteURL
-    if (process.env.BoosteURL === "local"){
+if ("BOOSTE_URL" in process.env){
+    var endpoint = process.env.BOOSTE_URL
+    if (process.env.BOOSTE_URL === "local"){
+        console.log("Running from local")
         endpoint = "http://localhost/"
     }
 } else {
-    var endpoint = 'https://booste-corporation-v3-flask.zeet.app/'
+    var endpoint = 'https://api.booste.io/'
 }
 
 exports.runMain = async (apiKey, modelKey, modelParameters) => {
-    const syncMode = "synchronous"
-    const taskID = await callStartAPI(apiKey, modelKey, modelParameters, syncMode)
-    const delayParams = chooseDelayParams()
-    const interval = delayParams['interval']
-    const initialWait = delayParams['initialWait']
-    await timeout(initialWait)
+    const taskID = await callStartAPI(apiKey, modelKey, modelParameters)
     var retries = 0
     while (true) {
-        const jsonOut = await callCheckAPI(apiKey, syncMode, taskID).catch(err => {
+        const jsonOut = await callCheckAPI(taskID).catch(err => {
             if (err.includes("busy or not available")){
-                // console.log("Retry")
                 retries = retries + 1
-                // console.log(retries)
                 if (retries > 5){
                     throw "Server error: Job check endpoint busy or not available."
                 }
@@ -31,37 +26,41 @@ exports.runMain = async (apiKey, modelKey, modelParameters) => {
             }
         })
         if (jsonOut !== undefined){
-            if (jsonOut['status'] === "finished"){
-                return jsonOut["output"]
-            }
-            if (jsonOut["status"] === "failed"){
-                throw "Server error: Booste inference job returned status 'Failed'"
+            if (jsonOut.taskStatus === "Done"){
+                payloadOut = jsonOut.taskOut
+                // Nasty backward compat fix for users on GPT2 servers expecting plaintext output
+                if('output' in payloadOut){
+                    // console.log("workaround")
+                    return payloadOut.output
+                }
+                return jsonOut.taskOut
             }
         }
-        await timeout(interval)
     }
 
 }
 
 exports.startMain = async (apiKey, modelKey, modelParameters) => {
-    const syncMode = "asynchronous"
-    const taskID = await callStartAPI(apiKey, modelKey, modelParameters, syncMode)
+    const taskID = await callStartAPI(apiKey, modelKey, modelParameters)
     return taskID
 }
 
 exports.checkMain = async (apiKey, taskID) => {
-    const syncMode = "asynchronous"
-    const jsonOut = await callCheckAPI(apiKey, syncMode, taskID)
+    const jsonOut = await callCheckAPI(taskID)
     return jsonOut
 }
 
-const callStartAPI = async (apiKey, modelKey, modelParameters, syncMode) => {
-    const urlStart = endpoint.concat("inference/start")
+const callStartAPI = async (apiKey, modelKey, modelParameters) => {
+    const urlStart = endpoint.concat("api/task/start/v1/")
     const payload = {
-        "apiKey" : apiKey,
-        "modelKey" : modelKey,
-        "modelParameters" : modelParameters, 
-        "syncMode" : syncMode
+        "id": uuidv4(),
+        "created": Math.floor(new Date().getTime() / 1000),
+        "data":
+        {
+            "apiKey" : apiKey,
+            "modelKey" : modelKey,
+            "modelParameters" : modelParameters
+        }
     }
     
     const response = await axios.post(urlStart, payload).catch(err => {
@@ -70,25 +69,34 @@ const callStartAPI = async (apiKey, modelKey, modelParameters, syncMode) => {
                 "code" : err.response.status,
                 "message" : err.response.data['message']
             }
-            throw `Server error: Booste inference start call returned status code ${format.code}\n${format.message}`
+            throw `Booste inference start call returned status code ${format.code}\n${format.message}`
         } else if (err.request) {
-            throw 'Server error: Job start endpoint busy or not available.'
+            throw 'Job start endpoint busy or not available.'
         } else {
             console.log(err)
             throw "Misc axios error. Please email erik@booste.io with above error json"
         }
     })
     const jsonOut = response.data
-    const taskID = jsonOut.taskID
+    
+    if (!jsonOut.success){
+        throw `Booste inference start call failed with message: ${jsonOut.message}`
+    }
+    const taskID = jsonOut.data.taskID
     return taskID
 }
 
-const callCheckAPI = async (apiKey, syncMode, taskID) => {
-    const urlCheck = endpoint.concat("inference/check")
+const callCheckAPI = async (taskID) => {
+    const urlCheck = endpoint.concat("api/task/check/v1/")
+
     const payload = {
-        "apiKey" : apiKey,
-        "syncMode" : syncMode,
-        "taskID" : taskID
+        "id": uuidv4(),
+        "created": Math.floor(new Date().getTime() / 1000),
+        "longPoll": true,
+        "data":
+        {
+            "taskID" : taskID
+        }
     }
     
     const response = await axios.post(urlCheck, payload).catch(err => {
@@ -106,22 +114,11 @@ const callCheckAPI = async (apiKey, syncMode, taskID) => {
         }
     })
     const jsonOut = response.data
-    return jsonOut
-}
 
-const chooseDelayParams = () => {
-    // choose a delay appropriate to the call
+    if (!jsonOut.success){
+        throw `Booste inference check call failed with message: ${jsonOut.message}`
+    }
+    const data = jsonOut.data
 
-    // TODO: actually do this dynamically based on model. 
-    // Perhaps pass back suggested wait time from start call.
-
-    // Hardcode for now
-    var delayParams = {'interval': 1000, "initialWait": 1000}
-    return delayParams
-}
-
-
-/// baaaaaad practice bro
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return data
 }

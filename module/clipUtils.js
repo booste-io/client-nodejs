@@ -4,9 +4,9 @@ const fs = require('fs');
 const imageToBase64 = require('image-to-base64');
 const utf8 = require('utf8');
 
-if ("BoosteURL" in process.env){
-    var endpoint = process.env.BoosteURL
-    if (process.env.BoosteURL === "local"){
+if ("BOOSTE_URL" in process.env){
+    var endpoint = process.env.BOOSTE_URL
+    if (process.env.BOOSTE_URL === "local"){
         endpoint = 'http://localhost:8080/2015-03-31/functions/function/invocations'
     }
 } else {
