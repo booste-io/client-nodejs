@@ -3,8 +3,9 @@ const { v4: uuidv4 } = require('uuid');
 
 if ("BOOSTE_URL" in process.env){
     var endpoint = process.env.BOOSTE_URL
+    console.log("Running from", endpoint)
     if (process.env.BOOSTE_URL === "local"){
-        console.log("Running from local")
+        // console.log("Running from local")
         endpoint = "http://localhost/"
     }
 } else {
