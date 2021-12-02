@@ -1,23 +1,25 @@
 const genericsUtils = require("./genericsUtils")
 
 // Generics (calling models by modelKey argument rather than by function name)
-exports.run = async (apiKey, modelKey, modelParameters) => {
+exports.run = async (apiKey, modelKey, modelInputs = {}, strategy = {}) => {
   const out = await genericsUtils.runMain(
     apiKey = apiKey, 
     modelKey = modelKey,
-    modelParameters=modelParameters)
+    modelInputs=modelInputs,
+    strategy = strategy)
   return out
 }
 
-exports.start = async (apiKey, modelKey, modelParameters) => {
-  const taskID = await genericsUtils.startMain(
+exports.start = async (apiKey, modelKey, modelInputs = {}, strategy= {}) => {
+  const callID = await genericsUtils.startMain(
     apiKey = apiKey, 
     modelKey = modelKey,
-    modelParameters=modelParameters)
-  return taskID
+    modelInputs=modelInputs,
+    strategy = strategy)
+  return callID
 }
 
-exports.check = async (apiKey, taskID) => {
-  const jsonOut = await genericsUtils.checkMain(apiKey, taskID)
+exports.check = async (apiKey, callID) => {
+  const jsonOut = await genericsUtils.checkMain(apiKey, callID)
   return jsonOut
 }
