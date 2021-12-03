@@ -1,6 +1,7 @@
 # Testing
 tests
 oldTests
+test*
 
 # Logs
 logs
