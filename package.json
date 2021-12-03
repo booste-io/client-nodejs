@@ -1,5 +1,6 @@
 {
   "dependencies": {
     "@banana-dev/banana-dev": "file:module"
-  }
+  },
+  "version": "1.0.0"
 }
