@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "A node client to interact with Banana's machine learning inference APIs",
   "main": "index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,5 +15,9 @@
     "utf8": "^3.0.0",
     "uuid": "^8.3.2",
     "valid-url": "^1.0.9"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/node": "^17.0.13"
   }
 }
