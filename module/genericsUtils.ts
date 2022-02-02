@@ -18,7 +18,7 @@ export async function runMain(apiKey: string, modelKey: string, modelInputs: obj
         const jsonOut = await checkAPI(apiKey, callID)
         if (jsonOut !== undefined){
             if (jsonOut.message.toLowerCase() === "success"){
-                jsonOut['CallID'] = callID
+                jsonOut['callID'] = callID
                 return jsonOut
             }
         }
