@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkMain = exports.startMain = exports.runMain = void 0;
+exports.checkMain = exports.feedback = exports.startMain = exports.runMain = void 0;
 const axios_1 = __importDefault(require("axios"));
 const { v4: uuidv4 } = require('uuid');
 let endpoint = 'https://api.banana.dev/';
@@ -31,6 +31,7 @@ function runMain(apiKey, modelKey, modelInputs = {}, strategy = {}) {
             const jsonOut = yield checkAPI(apiKey, callID);
             if (jsonOut !== undefined) {
                 if (jsonOut.message.toLowerCase() === "success") {
+                    jsonOut['callID'] = callID;
                     return jsonOut;
                 }
             }
@@ -45,6 +46,13 @@ function startMain(apiKey, modelKey, modelInputs = {}, strategy = {}) {
     });
 }
 exports.startMain = startMain;
+function feedback(apiKey, callID, feedback = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const jsonOut = yield feedbackAPI(apiKey, callID, feedback);
+        return jsonOut;
+    });
+}
+exports.feedback = feedback;
 function checkMain(apiKey, callID) {
     return __awaiter(this, void 0, void 0, function* () {
         const jsonOut = yield checkAPI(apiKey, callID);
@@ -83,6 +91,33 @@ const startAPI = (apiKey, modelKey, modelInputs, strategy) => __awaiter(void 0, 
         throw `server error: start call failed without a message or callID`;
     }
     return callID;
+});
+const feedbackAPI = (apiKey, callID, feedback) => __awaiter(void 0, void 0, void 0, function* () {
+    const url = endpoint.concat("feedback/");
+    const payload = {
+        "id": uuidv4(),
+        "created": Math.floor(new Date().getTime() / 1000),
+        "apiKey": apiKey,
+        "callID": callID,
+        "feedback": feedback
+    };
+    const response = yield axios_1.default.post(url, payload).catch(err => {
+        if (err.response) {
+            throw `server error: status code ${err.response.status}`;
+        }
+        else if (err.request) {
+            throw 'server error: endpoint busy or not available.';
+        }
+        else {
+            console.log(err);
+            throw "Misc axios error. Please email erik@banana.dev with above error";
+        }
+    });
+    const jsonOut = response.data;
+    if (jsonOut.message.toLowerCase().includes("error")) {
+        throw jsonOut.message;
+    }
+    return jsonOut;
 });
 const checkAPI = (apiKey, callID) => __awaiter(void 0, void 0, void 0, function* () {
     const urlCheck = endpoint.concat("check/v2/");

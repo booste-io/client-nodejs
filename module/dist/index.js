@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.check = exports.start = exports.run = void 0;
+exports.check = exports.feedback = exports.start = exports.run = void 0;
 const genericsUtils = require("./genericsUtils");
 function run(apiKey, modelKey, modelInputs = {}, strategy = {}) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -25,6 +25,13 @@ function start(apiKey, modelKey, modelInputs = {}, strategy = {}) {
     });
 }
 exports.start = start;
+function feedback(apiKey, callID, feedback = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const jsonOut = yield genericsUtils.feedback(apiKey, callID, feedback);
+        return jsonOut;
+    });
+}
+exports.feedback = feedback;
 function check(apiKey, callID) {
     return __awaiter(this, void 0, void 0, function* () {
         const jsonOut = yield genericsUtils.checkMain(apiKey, callID);
