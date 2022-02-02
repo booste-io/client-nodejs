@@ -77,7 +77,7 @@ const startAPI = async (apiKey: string, modelKey: string, modelInputs: object, s
 }
 
 const feedbackAPI = async (apiKey: string, callID: string, feedback: object): Promise<any> => {
-    const url = endpoint.concat("feedback/")
+    const url = endpoint.concat("feedback/v2/")
 
     const payload = {
         "id": uuidv4(),
