@@ -93,7 +93,7 @@ const startAPI = (apiKey, modelKey, modelInputs, strategy) => __awaiter(void 0, 
     return callID;
 });
 const feedbackAPI = (apiKey, callID, feedback) => __awaiter(void 0, void 0, void 0, function* () {
-    const url = endpoint.concat("feedback/");
+    const url = endpoint.concat("feedback/v2/");
     const payload = {
         "id": uuidv4(),
         "created": Math.floor(new Date().getTime() / 1000),
