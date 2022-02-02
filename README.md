@@ -36,3 +36,5 @@ var  out = await  banana.run(apiKey, modelKey, modelParameters
 }
 run()
 ```
+
+If you want to run a mocked backend locally see the devkit git repo for info 
