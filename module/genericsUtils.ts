@@ -1,9 +1,9 @@
-const axios = require('axios');
-const { v4: uuidv4 } = require('uuid');
+import axios, {AxiosError} from 'axios'
+const { v4: uuidv4 } = require('uuid')
 
-let endpoint = 'https://api.banana.dev/'
+let endpoint: string = 'https://api.banana.dev/'
 if ("BANANA_URL" in process.env){
-    endpoint = process.env.BANANA_URL
+    endpoint = process.env.BANANA_URL!
     console.log("Running from", endpoint)
     if (process.env.BANANA_URL === "local"){
         // console.log("Running from local")
@@ -12,12 +12,13 @@ if ("BANANA_URL" in process.env){
 }
 
 
-exports.runMain = async (apiKey, modelKey, modelInputs, strategy) => {
+export async function runMain(apiKey: string, modelKey: string, modelInputs: object = {}, strategy: object = {}): Promise<object>{
     const callID = await startAPI(apiKey, modelKey, modelInputs, strategy)
     while (true) {
         const jsonOut = await checkAPI(apiKey, callID)
         if (jsonOut !== undefined){
             if (jsonOut.message.toLowerCase() === "success"){
+                jsonOut['callID'] = callID
                 return jsonOut
             }
         }
@@ -25,17 +26,22 @@ exports.runMain = async (apiKey, modelKey, modelInputs, strategy) => {
 
 }
 
-exports.startMain = async (apiKey, modelKey, modelInputs, strategy) => {
+export async function startMain(apiKey: string, modelKey: string, modelInputs: object = {}, strategy: object = {}): Promise<string>{
     const callID = await startAPI(apiKey, modelKey, modelInputs, strategy)
     return callID
 }
 
-exports.checkMain = async (apiKey, callID) => {
+export async function feedback(apiKey: string, callID: string, feedback: object = {}): Promise<object>{
+    const jsonOut = await feedbackAPI(apiKey, callID, feedback)
+    return jsonOut
+}
+
+export async function checkMain(apiKey: string, callID: string): Promise<object>{
     const jsonOut = await checkAPI(apiKey, callID)
     return jsonOut
 }
 
-const startAPI = async (apiKey, modelKey, modelInputs, strategy) => {
+const startAPI = async (apiKey: string, modelKey: string, modelInputs: object, strategy: object): Promise<string> => {
     const urlStart = endpoint.concat("start/v2/")
     const payload = {
         "id": uuidv4(),
@@ -70,7 +76,35 @@ const startAPI = async (apiKey, modelKey, modelInputs, strategy) => {
     return callID
 }
 
-const checkAPI = async (apiKey, callID) => {
+const feedbackAPI = async (apiKey: string, callID: string, feedback: object): Promise<any> => {
+    const url = endpoint.concat("feedback/v2/")
+
+    const payload = {
+        "id": uuidv4(),
+        "created": Math.floor(new Date().getTime() / 1000),
+        "apiKey" : apiKey,
+        "callID" : callID,
+        "feedback": feedback
+    }
+    
+    const response = await axios.post(url, payload).catch(err => {
+        if (err.response) {
+            throw `server error: status code ${err.response.status}`
+        } else if (err.request) {
+            throw 'server error: endpoint busy or not available.'
+        } else {
+            console.log(err)
+            throw "Misc axios error. Please email erik@banana.dev with above error"
+        }
+    })
+    const jsonOut = response.data
+    
+    if (jsonOut.message.toLowerCase().includes("error")){
+        throw jsonOut.message
+    }
+    return jsonOut
+}
+const checkAPI = async (apiKey: string, callID: string): Promise<any> => {
     const urlCheck = endpoint.concat("check/v2/")
 
     const payload = {
